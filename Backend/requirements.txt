@@ -1,0 +1,10 @@
+django
+djangorestframework
+psycopg2-binary
+django-cors-headers
+daphne
+channels
+djangorestframework-simplejwt
+Pillow
+WebSocket
+Twisted[http2,tls]
