@@ -1,0 +1,25 @@
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=myfixer
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=RP@xel26
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+  redis:
+    image: "redis:alpine"
+
+volumes:
+  postgres_data:

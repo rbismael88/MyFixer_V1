@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:myfixer/src/presentation/screens/manage_account_screen.dart';
 import 'package:myfixer/src/presentation/screens/provider_profile_screen.dart';
@@ -10,7 +9,12 @@ class AccountScreen extends StatelessWidget {
   final VoidCallback onSignOut;
   final AuthService authService;
 
-  const AccountScreen({super.key, required this.isProviderMode, required this.onToggleProviderMode, required this.onSignOut, required this.authService});
+  const AccountScreen(
+      {super.key,
+      required this.isProviderMode,
+      required this.onToggleProviderMode,
+      required this.onSignOut,
+      required this.authService});
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +69,18 @@ class AccountScreen extends StatelessWidget {
           children: [
             Text(
               '${authService.currentFirstName ?? ''} ${authService.currentLastName ?? ''}',
-              style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Row(
               children: [
                 Icon(Icons.star, color: Colors.yellow, size: 16),
                 SizedBox(width: 4),
-                Text('5.0', style: TextStyle(color: Colors.white, fontSize: 16)),
+                Text('5.0',
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
               ],
             ),
           ],
@@ -91,7 +99,8 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModeSwitch(AuthService authService) { // Update signature
+  Widget _buildModeSwitch(AuthService authService) {
+    // Update signature
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -101,7 +110,8 @@ class AccountScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Modo Proveedor', style: TextStyle(color: Colors.white, fontSize: 16)),
+          const Text('Modo Proveedor',
+              style: TextStyle(color: Colors.white, fontSize: 16)),
           Switch(
             value: isProviderMode,
             onChanged: (value) => onToggleProviderMode(),
@@ -143,7 +153,8 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPromoCard(String title, String subtitle, IconData icon, Color color) {
+  Widget _buildPromoCard(
+      String title, String subtitle, IconData icon, Color color) {
     return Card(
       color: Colors.grey[900],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -155,7 +166,11 @@ class AccountScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(title,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(subtitle, style: TextStyle(color: Colors.grey[400])),
                 ],
@@ -172,20 +187,30 @@ class AccountScreen extends StatelessWidget {
   Widget _buildSettingsList(BuildContext context) {
     return Column(
       children: [
-        _buildSettingsItem(Icons.person_outline, 'Gestionar Cuenta', 'Edita tu perfil, contraseña, etc.', () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => ManageAccountScreen(authService: authService)));
+        _buildSettingsItem(Icons.person_outline, 'Gestionar Cuenta',
+            'Edita tu perfil, contraseña, etc.', () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ManageAccountScreen(authService: authService)));
         }),
         if (isProviderMode)
           Column(
             children: [
               Divider(color: Colors.grey[800]),
-              _buildSettingsItem(Icons.business_center, 'Perfil de Proveedor', 'Gestiona tu información de proveedor', () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProviderProfileScreen()));
+              _buildSettingsItem(Icons.business_center, 'Perfil de Proveedor',
+                  'Gestiona tu información de proveedor', () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProviderProfileScreen()));
               }),
             ],
           ),
         Divider(color: Colors.grey[800]),
-        _buildSettingsItem(Icons.favorite_border, 'Proveedores Guardados', null, () {}),
+        _buildSettingsItem(
+            Icons.favorite_border, 'Proveedores Guardados', null, () {}),
         Divider(color: Colors.grey[800]),
         _buildSettingsItem(Icons.local_offer, 'Promociones', null, () {}),
         Divider(color: Colors.grey[800]),
@@ -193,20 +218,28 @@ class AccountScreen extends StatelessWidget {
         Divider(color: Colors.grey[800]),
         _buildSettingsItem(Icons.message, 'Mensajes', null, () {}),
         Divider(color: Colors.grey[800]),
-        _buildSettingsItem(Icons.gavel, 'Legal', 'Términos de Servicio, Política de Privacidad', () {}),
+        _buildSettingsItem(Icons.gavel, 'Legal',
+            'Términos de Servicio, Política de Privacidad', () {}),
         Divider(color: Colors.grey[800]),
-        _buildSettingsItem(Icons.logout, 'Cerrar Sesión', null, onSignOut, color: Colors.red),
+        _buildSettingsItem(Icons.logout, 'Cerrar Sesión', null, onSignOut,
+            color: Colors.red),
       ],
     );
   }
 
-  Widget _buildSettingsItem(IconData icon, String title, String? subtitle, VoidCallback onTap, {Color? color}) {
+  Widget _buildSettingsItem(
+      IconData icon, String title, String? subtitle, VoidCallback onTap,
+      {Color? color}) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: color ?? Colors.white),
-      title: Text(title, style: TextStyle(color: color ?? Colors.white, fontSize: 16)),
-      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(color: Colors.grey[400])) : null,
-      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+      title: Text(title,
+          style: TextStyle(color: color ?? Colors.white, fontSize: 16)),
+      subtitle: subtitle != null
+          ? Text(subtitle, style: TextStyle(color: Colors.grey[400]))
+          : null,
+      trailing:
+          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
       onTap: onTap,
     );
   }

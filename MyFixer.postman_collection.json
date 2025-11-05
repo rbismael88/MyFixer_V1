@@ -1,0 +1,112 @@
+{
+	"info": {
+		"_postman_id": "a8e8c3a8-a1b3-462d-9c33-e8a0c5a3e2f1",
+		"name": "MyFixer API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"identifier\": \"tu_usuario_o_email\",\n    \"password\": \"tu_contraseña\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8001/users/login/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8001",
+					"path": [
+						"users",
+						"login",
+						""
+					]
+				},
+				"description": "Autentica a un usuario y devuelve tokens de acceso y de refresco."
+			},
+			"response": []
+		},
+		{
+			"name": "Verify User Documents",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"identity_card_verified\": true,\n    \"criminal_record_certificate_verified\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8001/users/verify-documents/{{user_id}}/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8001",
+					"path": [
+						"users",
+						"verify-documents",
+						"{{user_id}}",
+						""
+					]
+				},
+				"description": "Actualiza el estado de verificación de los documentos de un usuario.\n\n**Requiere autenticación.**\n\n**Variables necesarias:**\n- `user_id`: El ID del usuario a verificar.\n- `auth_token`: El token de acceso JWT obtenido al iniciar sesión."
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "user_id",
+			"value": "0",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "tu_token_de_acceso_aqui",
+			"type": "string"
+		}
+	]
+}

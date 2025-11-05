@@ -8,3 +8,4 @@ djangorestframework-simplejwt
 Pillow
 WebSocket
 Twisted[http2,tls]
+channels-redis

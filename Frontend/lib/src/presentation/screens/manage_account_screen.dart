@@ -1,6 +1,6 @@
-
-
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:myfixer/src/presentation/screens/change_password_screen.dart';
 import 'package:myfixer/src/services/auth_service.dart';
 
@@ -20,15 +20,57 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
+  File? _profilePicture;
+  File? _identityCard;
+  File? _criminalRecordCertificate;
+
+  Future<void> _pickImage(
+      ImageSource source, Function(File) onImageSelected) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      onImageSelected(File(pickedFile.path));
+    }
+  }
+
+  Future<void> _pickProfilePicture() async {
+    _pickImage(ImageSource.gallery, (image) {
+      setState(() {
+        _profilePicture = image;
+      });
+    });
+  }
+
+  Future<void> _pickIdentityCard() async {
+    _pickImage(ImageSource.gallery, (image) {
+      setState(() {
+        _identityCard = image;
+      });
+    });
+  }
+
+  Future<void> _pickCriminalRecordCertificate() async {
+    _pickImage(ImageSource.gallery, (image) {
+      setState(() {
+        _criminalRecordCertificate = image;
+      });
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _firstNameController = TextEditingController(text: widget.authService.currentFirstName ?? '');
-    _lastNameController = TextEditingController(text: widget.authService.currentLastName ?? '');
-    _usernameController = TextEditingController(text: widget.authService.currentUsername ?? '');
-    _emailController = TextEditingController(text: widget.authService.currentEmail ?? '');
-    _phoneController = TextEditingController(text: widget.authService.currentPhoneNumber ?? '');
+    _firstNameController =
+        TextEditingController(text: widget.authService.currentFirstName ?? '');
+    _lastNameController =
+        TextEditingController(text: widget.authService.currentLastName ?? '');
+    _usernameController =
+        TextEditingController(text: widget.authService.currentUsername ?? '');
+    _emailController =
+        TextEditingController(text: widget.authService.currentEmail ?? '');
+    _phoneController = TextEditingController(
+        text: widget.authService.currentPhoneNumber ?? '');
   }
 
   @override
@@ -43,8 +85,9 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
 
   Future<void> _saveProfileChanges() async {
     if (_formKey.currentState!.validate()) {
-      if (!mounted) return; // Guard against async gap
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Guardando cambios...')),
       );
 
@@ -53,17 +96,18 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
         lastName: _lastNameController.text,
         username: _usernameController.text,
         phoneNumber: _phoneController.text,
-        // email is read-only on backend, so we don't send it here
+        profilePicture: _profilePicture,
+        identityCard: _identityCard,
+        criminalRecordCertificate: _criminalRecordCertificate,
       );
 
-      if (!mounted) return; // Guard against async gap
+      if (!mounted) return;
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Perfil actualizado con éxito!')),
         );
-        // Optionally, navigate back or refresh data
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Error al actualizar el perfil.')),
         );
       }
@@ -75,7 +119,8 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Gestionar Cuenta', style: TextStyle(color: Colors.white)),
+        title: const Text('Gestionar Cuenta',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -91,7 +136,17 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.grey[800],
-                    child: const Icon(Icons.person, color: Colors.white, size: 60),
+                    backgroundImage: _profilePicture != null
+                        ? FileImage(_profilePicture!)
+                        : (widget.authService.profilePictureUrl != null
+                            ? NetworkImage(
+                                widget.authService.profilePictureUrl!)
+                            : null) as ImageProvider?,
+                    child: _profilePicture == null &&
+                            widget.authService.profilePictureUrl == null
+                        ? const Icon(Icons.person,
+                            color: Colors.white, size: 60)
+                        : null,
                   ),
                   Positioned(
                     bottom: 0,
@@ -100,10 +155,9 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
                       radius: 18,
                       backgroundColor: Colors.white,
                       child: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.black, size: 20),
-                        onPressed: () {
-                          // Handle profile picture change
-                        },
+                        icon: const Icon(Icons.edit,
+                            color: Colors.black, size: 20),
+                        onPressed: _pickProfilePicture,
                       ),
                     ),
                   ),
@@ -113,15 +167,44 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
             const SizedBox(height: 24),
 
             _buildSectionTitle('Información del Perfil'),
-            _buildTextFormField(_firstNameController, 'Nombres', readOnly: false),
+            _buildTextFormField(_firstNameController, 'Nombres',
+                readOnly: false),
             const SizedBox(height: 8),
-            _buildTextFormField(_lastNameController, 'Apellidos', readOnly: false),
+            _buildTextFormField(_lastNameController, 'Apellidos',
+                readOnly: false),
             const SizedBox(height: 8),
-            _buildTextFormField(_usernameController, 'Username', readOnly: false),
+            _buildTextFormField(_usernameController, 'Username',
+                readOnly: false),
             const SizedBox(height: 8),
-            _buildTextFormField(_emailController, 'Email', readOnly: false, keyboardType: TextInputType.emailAddress),
+            _buildTextFormField(_emailController, 'Email',
+                readOnly: false, keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 8),
-            _buildTextFormField(_phoneController, 'Teléfono', readOnly: false, keyboardType: TextInputType.phone),
+            _buildTextFormField(_phoneController, 'Teléfono',
+                readOnly: false, keyboardType: TextInputType.phone),
+            const SizedBox(height: 24),
+
+            _buildSectionTitle('Documentos'),
+            _buildDocumentTile(
+              context,
+              'Cédula de Identidad',
+              widget.authService.identityCardUrl != null
+                  ? 'Subido'
+                  : (_identityCard != null
+                      ? 'Archivo seleccionado'
+                      : 'No subido'),
+              _pickIdentityCard,
+            ),
+            if (widget.authService.currentUserType == 'provider')
+              _buildDocumentTile(
+                context,
+                'Certificado de no antecedentes penales',
+                widget.authService.criminalRecordCertificateUrl != null
+                    ? 'Subido'
+                    : (_criminalRecordCertificate != null
+                        ? 'Archivo seleccionado'
+                        : 'No subido'),
+                _pickCriminalRecordCertificate,
+              ),
             const SizedBox(height: 24),
 
             ElevatedButton(
@@ -129,20 +212,20 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Guardar Cambios', style: TextStyle(fontSize: 18, color: Colors.white)),
+              child: const Text('Guardar Cambios',
+                  style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
-            const SizedBox(height: 24),
-
-            _buildSectionTitle('Documentos'),
-            _buildDocumentTile(context, 'Cédula de Identidad', 'subido.pdf', () {}),
-            _buildDocumentTile(context, 'Certificado de no antecedentes penales', 'No subido', () {}),
             const SizedBox(height: 24),
 
             _buildSectionTitle('Seguridad'),
             _buildActionTile(context, 'Cambiar Contraseña', () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ChangePasswordScreen()));
             }),
             const SizedBox(height: 24),
 
@@ -159,11 +242,14 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-      child: Text(title, style: const TextStyle(color: Colors.grey, fontSize: 16)),
+      child:
+          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 16)),
     );
   }
 
-  Widget _buildTextFormField(TextEditingController controller, String label, {bool readOnly = false, TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextFormField(TextEditingController controller, String label,
+      {bool readOnly = false,
+      TextInputType keyboardType = TextInputType.text}) {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
@@ -199,17 +285,22 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.grey[900],
-          title: const Text('Eliminar Cuenta', style: TextStyle(color: Colors.white)),
-          content: const Text('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.', style: TextStyle(color: Colors.grey)),
+          title: const Text('Eliminar Cuenta',
+              style: TextStyle(color: Colors.white)),
+          content: const Text(
+              '¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.',
+              style: TextStyle(color: Colors.grey)),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+              child:
+                  const Text('Cancelar', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+              child:
+                  const Text('Eliminar', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 // Perform delete account action
                 Navigator.of(context).pop();
@@ -221,25 +312,32 @@ class _ManageAccountScreenState extends State<ManageAccountScreen> {
     );
   }
 
-  Widget _buildDocumentTile(BuildContext context, String title, String status, VoidCallback onTap) {
+  Widget _buildDocumentTile(
+      BuildContext context, String title, String status, VoidCallback onTap) {
     return Card(
       color: Colors.grey[900],
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         title: Text(title, style: const TextStyle(color: Colors.white)),
-        subtitle: Text(status, style: TextStyle(color: status == 'No subido' ? Colors.red : Colors.green)),
+        subtitle: Text(status,
+            style: TextStyle(
+                color: status == 'No subido' ? Colors.red : Colors.green)),
         trailing: const Icon(Icons.upload_file, color: Colors.white, size: 20),
         onTap: onTap,
       ),
     );
   }
 
-  Widget _buildActionTile(BuildContext context, String title, VoidCallback onTap, {Color? color}) {
+  Widget _buildActionTile(
+      BuildContext context, String title, VoidCallback onTap,
+      {Color? color}) {
     return Card(
       color: Colors.grey[900],
       child: ListTile(
-        title: Text(title, style: TextStyle(color: color ?? Colors.white, fontSize: 16)),
-        trailing: Icon(Icons.arrow_forward_ios, color: color ?? Colors.white, size: 16),
+        title: Text(title,
+            style: TextStyle(color: color ?? Colors.white, fontSize: 16)),
+        trailing: Icon(Icons.arrow_forward_ios,
+            color: color ?? Colors.white, size: 16),
         onTap: onTap,
       ),
     );
