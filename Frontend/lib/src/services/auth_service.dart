@@ -17,6 +17,7 @@ class AuthService {
   String? get criminalRecordCertificateUrl =>
       _currentUser?['criminal_record_certificate'];
   String? get currentUserType => _currentUser?['user_type'];
+  bool get isVerified => _currentUser?['is_verified'] ?? false;
 
   Future<String?> getToken() async {
     return _accessToken;
@@ -112,12 +113,34 @@ class AuthService {
 
       if (response.statusCode == 200) {
         _currentUser?['user_type'] = userType;
+        await fetchUserProfile(); // Refresh user data
         return true;
       } else {
         return false;
       }
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<void> fetchUserProfile() async {
+    if (_accessToken == null) return;
+
+    final url = Uri.parse('$baseUrl/users/profile/');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _currentUser = json.decode(response.body);
+      }
+    } catch (e) {
+      // Handle error, maybe log it
     }
   }
 

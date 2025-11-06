@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
-from .serializers import UserSerializer, LoginSerializer, UserProfileUpdateSerializer
+from .serializers import UserSerializer, LoginSerializer, UserProfileUpdateSerializer, UserProfileSerializer
 from .utils import is_user_verified
 from .consumers import send_admin_notification, send_user_update
 from asgiref.sync import async_to_sync
@@ -181,8 +181,12 @@ class UserLoginView(APIView):
 
 class UserProfileView(RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserProfileUpdateSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return UserProfileUpdateSerializer
+        return UserProfileSerializer
 
     def get_object(self):
         return self.request.user

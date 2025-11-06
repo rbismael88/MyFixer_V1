@@ -22,6 +22,14 @@ class User(AbstractUser):
     identity_card_verified = models.BooleanField(default=False)
     criminal_record_certificate_verified = models.BooleanField(default=False)
 
+    @property
+    def is_verified(self):
+        if self.user_type == 'client':
+            return self.profile_picture_verified and self.identity_card_verified
+        elif self.user_type == 'provider':
+            return self.profile_picture_verified and self.identity_card_verified and self.criminal_record_certificate_verified
+        return False
+
     def save(self, *args, **kwargs):
         # Check if the instance has been saved before.
         if self.pk:

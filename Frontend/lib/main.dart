@@ -3,6 +3,7 @@ import 'package:myfixer/src/presentation/screens/home_screen.dart';
 import 'package:myfixer/src/presentation/screens/signin_screen.dart';
 import 'package:myfixer/src/presentation/screens/signup_screen.dart';
 import 'package:myfixer/src/services/auth_service.dart';
+import 'package:myfixer/src/services/websocket_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,9 +39,32 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   final AuthService _authService = AuthService();
+  WebSocketService? _webSocketService;
   bool _isAuthenticated = false;
   bool _showSignUp = false;
   bool _isProviderMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebSocketService();
+  }
+
+  void _initializeWebSocketService() {
+    _webSocketService = WebSocketService(_authService, _handleUserUpdate);
+  }
+
+  void _handleUserUpdate() {
+    _authService.fetchUserProfile().then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  void _connectWebSocket() {
+    _webSocketService?.connect();
+  }
 
   void _toggleView() {
     setState(() {
@@ -49,6 +73,7 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   void _signOut() {
+    _webSocketService?.disconnect();
     _authService.signOut();
     setState(() {
       _isAuthenticated = false;
@@ -134,6 +159,7 @@ class _AuthGateState extends State<AuthGate> {
             setState(() {
               _isAuthenticated = true;
             });
+            _connectWebSocket();
           }
         },
         onGoToSignUp: _toggleView,

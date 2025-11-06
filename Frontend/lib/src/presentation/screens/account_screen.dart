@@ -67,12 +67,21 @@ class AccountScreen extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${authService.currentFirstName ?? ''} ${authService.currentLastName ?? ''}',
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Text(
+                  '${authService.currentFirstName ?? ''} ${authService.currentLastName ?? ''}',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold),
+                ),
+                if (authService.isVerified)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Icon(Icons.verified, color: Colors.blue, size: 24),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             const Row(
